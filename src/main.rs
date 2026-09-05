@@ -3,9 +3,9 @@ use std::time::UNIX_EPOCH;
 use macroquad::prelude::*;
 use macroquad::rand::srand;
 
-use crate::entities::asteroids::Asteroid;
 use crate::entities::ship::Ship;
 use crate::entities::ship::{Drawable, Movable};
+use crate::entities::spawner;
 
 mod entities;
 
@@ -25,9 +25,12 @@ async fn main() {
     let ship_texture: Texture2D =
         Texture2D::from_file_with_format(ship_bytes, Some(ImageFormat::Png));
     let mut ship = Ship::new(ship_texture);
-    let mut asteroid = Asteroid::new();
+    let mut spawner = spawner::Spawner::new();
 
     loop {
+        if is_key_pressed(KeyCode::Escape) {
+            break;
+        }
         clear_background(WHITE);
         draw_texture_ex(
             &background,
@@ -41,8 +44,7 @@ async fn main() {
         );
         ship.step();
         ship.draw();
-        asteroid.step();
-        asteroid.draw();
+        spawner.step();
         next_frame().await
     }
 }

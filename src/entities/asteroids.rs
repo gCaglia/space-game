@@ -86,15 +86,14 @@ impl Asteroid {
         let speed: f32 = RandomRange::gen_range(0.001, 0.005);
 
         let side = *sides.choose().unwrap();
-        let direction: [f32; 2];
 
-        if side == 0u8 {
+        let direction: [f32; 2] = if side == 0u8 {
             // vertical axis
-            direction = [0.5 - origin[0], range - origin[1]];
+            [0.5 - origin[0], range - origin[1]]
         } else {
             // horizontal axis
-            direction = [range - origin[0], 0.5 - origin[1]];
-        }
+            [range - origin[0], 0.5 - origin[1]]
+        };
 
         let magnitude: f32 = (direction[0].powi(2) + direction[1].powi(2)).sqrt();
         [

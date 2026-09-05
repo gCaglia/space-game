@@ -40,7 +40,7 @@ impl Ship {
 
 impl Drawable for Ship {
     fn draw(&self) {
-        let pos_x = self.rel_pos.get(0).unwrap() * screen_width();
+        let pos_x = self.rel_pos.first().unwrap() * screen_width();
         let pos_y = self.rel_pos.get(1).unwrap() * screen_height();
         draw_texture_ex(
             &self.texture,
