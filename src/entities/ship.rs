@@ -77,7 +77,11 @@ impl Movable for Ship {
     }
 
     fn update_angle(&mut self) {
-        self.angle = self.acc_vector[0].atan2(-self.acc_vector[1])
+        if self.acc_vector[0] == 0.0 && self.acc_vector[1] == 0.0 {
+            self.angle = 0.0
+        } else {
+            self.angle = self.acc_vector[0].atan2(-self.acc_vector[1])
+        }
     }
 
     fn step(&mut self) {
