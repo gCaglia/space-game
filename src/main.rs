@@ -11,7 +11,12 @@ mod entities;
 
 #[macroquad::main("SpaceGame")]
 async fn main() {
-    srand(std::time::SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs());
+    srand(
+        std::time::SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs(),
+    );
 
     let background_bytes = include_bytes!("../assets/space.png");
     let ship_bytes = include_bytes!("../assets/ship.png");

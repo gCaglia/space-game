@@ -1,5 +1,8 @@
 use macroquad::{
-    color::WHITE, input::{KeyCode, is_key_down}, texture::{DrawTextureParams, Texture2D, draw_texture_ex}, window::{screen_height, screen_width},
+    color::WHITE,
+    input::{KeyCode, is_key_down},
+    texture::{DrawTextureParams, Texture2D, draw_texture_ex},
+    window::{screen_height, screen_width},
 };
 
 const ACC_SPEED: f32 = 1e-5;
@@ -10,7 +13,7 @@ pub struct Ship {
     texture: Texture2D,
     rel_pos: Vec<f32>,
     acc_vector: Vec<f32>,
-    angle: f32
+    angle: f32,
 }
 
 pub trait Drawable {
@@ -30,7 +33,7 @@ impl Ship {
             texture,
             rel_pos: vec![0.5, 0.5],
             acc_vector: vec![0.0, 0.0],
-            angle: 0.0
+            angle: 0.0,
         }
     }
 }
@@ -39,8 +42,15 @@ impl Drawable for Ship {
     fn draw(&self) {
         let pos_x = self.rel_pos.get(0).unwrap() * screen_width();
         let pos_y = self.rel_pos.get(1).unwrap() * screen_height();
-        draw_texture_ex(&self.texture, pos_x, pos_y, WHITE, 
-            DrawTextureParams{rotation: self.angle, ..Default::default()}
+        draw_texture_ex(
+            &self.texture,
+            pos_x,
+            pos_y,
+            WHITE,
+            DrawTextureParams {
+                rotation: self.angle,
+                ..Default::default()
+            },
         );
     }
 }
