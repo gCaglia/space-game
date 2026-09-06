@@ -1,9 +1,15 @@
 use macroquad::{
     color::WHITE,
-    input::{KeyCode, is_key_down},
+    input::{
+        KeyCode::{self},
+        is_key_down, is_key_pressed,
+    },
+    math::Rect,
     texture::{DrawTextureParams, Texture2D, draw_texture_ex},
     window::{screen_height, screen_width},
 };
+
+use crate::entities::laser::Laser;
 
 const ACC_SPEED: f32 = 1e-5;
 const GAME_BOUNDS: (f32, f32) = (0.0, 0.975);
@@ -14,6 +20,8 @@ pub struct Ship {
     rel_pos: Vec<f32>,
     acc_vector: Vec<f32>,
     angle: f32,
+
+    shots: Vec<Laser>,
 }
 
 pub trait Drawable {
@@ -24,6 +32,8 @@ pub trait Movable {
     fn update_acc(&mut self);
     fn update_pos(&mut self);
     fn update_angle(&mut self);
+    fn update_fire(&mut self);
+    fn get_body(&self) -> Rect;
     fn step(&mut self);
 }
 
@@ -34,6 +44,7 @@ impl Ship {
             rel_pos: vec![0.5, 0.5],
             acc_vector: vec![0.0, 0.0],
             angle: 0.0,
+            shots: Vec::new(),
         }
     }
 }
@@ -94,9 +105,28 @@ impl Movable for Ship {
         }
     }
 
+    fn get_body(&self) -> Rect {
+        let x = self.rel_pos[0] * screen_width();
+        let y = self.rel_pos[1] * screen_height();
+        let h = self.texture.height();
+        let w = self.texture.width();
+
+        Rect { x, y, w, h }
+    }
+
+    fn update_fire(&mut self) {
+        if is_key_pressed(KeyCode::Space) {
+            let pos = self.get_body().center();
+            let ship_velocity = [self.acc_vector[0], self.acc_vector[1]];
+            self.shots.push(Laser::new(pos.into(), ship_velocity));
+        }
+        self.shots.retain_mut(|s| s.step());
+    }
+
     fn step(&mut self) {
         self.update_acc();
         self.update_angle();
         self.update_pos();
+        self.update_fire();
     }
 }
