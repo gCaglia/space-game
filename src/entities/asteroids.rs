@@ -6,9 +6,9 @@ use macroquad::{
     window::{screen_height, screen_width},
 };
 
-const AST_1: &[u8] = include_bytes!("../../assets/asteroid1.png");
-const AST_2: &[u8] = include_bytes!("../../assets/asteroid2.png");
-const AST_3: &[u8] = include_bytes!("../../assets/asteroid3.png");
+const AST_1: &[u8] = include_bytes!("../../assets/graphics/asteroid1.png");
+const AST_2: &[u8] = include_bytes!("../../assets/graphics/asteroid2.png");
+const AST_3: &[u8] = include_bytes!("../../assets/graphics/asteroid3.png");
 const AST: [&[u8]; 3] = [AST_1, AST_2, AST_3];
 
 const BOX_BOUND: f32 = 1.3;

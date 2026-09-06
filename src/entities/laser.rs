@@ -39,7 +39,6 @@ impl Laser {
         let w = 0.005 * screen_width();
         let h = 0.02 * screen_height();
 
-        
         let rotation: f32 = if self.velocity[0] == 0.0 && self.velocity[1] == 0.0 {
             0.0
         } else {

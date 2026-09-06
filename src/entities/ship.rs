@@ -1,4 +1,5 @@
 use macroquad::{
+    audio::{PlaySoundParams, Sound, play_sound},
     color::WHITE,
     input::{
         KeyCode::{self},
@@ -22,6 +23,7 @@ pub struct Ship {
     angle: f32,
 
     shots: Vec<Laser>,
+    laser_sound: Sound,
 }
 
 pub trait Drawable {
@@ -38,13 +40,14 @@ pub trait Movable {
 }
 
 impl Ship {
-    pub fn new(texture: Texture2D) -> Self {
+    pub fn new(texture: Texture2D, laser_sound: Sound) -> Self {
         Ship {
             texture,
             rel_pos: vec![0.5, 0.5],
             acc_vector: vec![0.0, 0.0],
             angle: 0.0,
             shots: Vec::new(),
+            laser_sound,
         }
     }
 }
@@ -119,6 +122,12 @@ impl Movable for Ship {
             let pos = self.get_body().center();
             let ship_velocity = [self.acc_vector[0], self.acc_vector[1]];
             self.shots.push(Laser::new(pos.into(), ship_velocity));
+            let sound = &self.laser_sound;
+            let params = PlaySoundParams {
+                looped: false,
+                volume: 1.0,
+            };
+            play_sound(sound, params);
         }
         self.shots.retain_mut(|s| s.step());
     }
