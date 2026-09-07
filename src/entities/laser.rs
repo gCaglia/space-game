@@ -1,5 +1,6 @@
 use macroquad::{
     color::YELLOW,
+    math::Rect,
     shapes::{DrawRectangleParams, draw_rectangle_ex},
     window::{screen_height, screen_width},
 };
@@ -33,12 +34,6 @@ impl Laser {
         self.pos[1] += self.velocity[1] * screen_height();
     }
     fn draw(&self) {
-        let x = self.pos[0];
-        let y = self.pos[1];
-
-        let w = 0.005 * screen_width();
-        let h = 0.02 * screen_height();
-
         let rotation: f32 = if self.velocity[0] == 0.0 && self.velocity[1] == 0.0 {
             0.0
         } else {
@@ -51,10 +46,22 @@ impl Laser {
             ..Default::default()
         };
 
-        draw_rectangle_ex(x, y, w, h, params);
+        let rect = self.get_body();
+
+        draw_rectangle_ex(rect.x, rect.y, rect.w, rect.h, params);
     }
 
     fn in_bounds(&self) -> bool {
         self.pos.iter().all(|v| -0.1 < *v || *v < 1.1)
+    }
+
+    pub fn get_body(&self) -> Rect {
+        let x = self.pos[0];
+        let y = self.pos[1];
+
+        let w = 0.005 * screen_width();
+        let h = 0.02 * screen_height();
+
+        Rect { x, y, w, h }
     }
 }

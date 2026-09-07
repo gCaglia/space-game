@@ -48,7 +48,7 @@ async fn main() {
         );
         ship.step();
         ship.draw();
-        spawner.step();
+        spawner.step(ship.get_shots_mut());
         next_frame().await
     }
 }

@@ -50,6 +50,10 @@ impl Ship {
             laser_sound,
         }
     }
+
+    pub fn get_shots_mut(&mut self) -> &mut Vec<Laser> {
+        &mut self.shots
+    }
 }
 
 impl Drawable for Ship {

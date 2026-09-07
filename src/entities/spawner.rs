@@ -1,6 +1,6 @@
 use std::time::SystemTime;
 
-use crate::entities::asteroids::Asteroid;
+use crate::entities::{asteroids::Asteroid, laser::Laser};
 
 pub struct Spawner {
     asteroids: Vec<Asteroid>,
@@ -17,10 +17,13 @@ impl Spawner {
         }
     }
 
-    pub fn step(&mut self) {
+    pub fn step(&mut self, shots: &mut Vec<Laser>) {
         // Update the position of all asteroids and
         // despawn all OOB
         self.update_asteroids();
+
+        // Despawn by hit
+        self.check_laser_collission(shots);
 
         // Get current number of asteroids and derive goal number
         let current: u16 = self.asteroids.len().try_into().unwrap();
@@ -51,6 +54,15 @@ impl Spawner {
         } else {
             50
         }
+    }
+
+    fn check_laser_collission(&mut self, shots: &mut Vec<Laser>) {
+        self.asteroids.retain_mut(|a| {
+            let shots_orig = shots.len();
+            shots.retain_mut(|s| !a.collission_with_rect(s.get_body()));
+            let shots_after = shots.len();
+            shots_orig == shots_after
+        });
     }
 
     fn update_asteroids(&mut self) {
