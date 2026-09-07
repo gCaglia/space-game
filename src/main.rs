@@ -11,6 +11,7 @@ use crate::entities::spawner;
 const LASER_SOUND: &[u8] = include_bytes!("../assets/sounds/laserSmall_004.ogg");
 
 mod entities;
+mod utils;
 
 #[macroquad::main("SpaceGame")]
 async fn main() {
@@ -29,7 +30,7 @@ async fn main() {
         Texture2D::from_file_with_format(ship_bytes, Some(ImageFormat::Png));
     let laser_sound: Sound = load_sound_from_bytes(LASER_SOUND).await.unwrap();
     let mut ship = Ship::new(ship_texture, laser_sound);
-    let mut spawner = spawner::Spawner::new();
+    let mut spawner = spawner::Spawner::new().load_sounds().await;
 
     loop {
         if is_key_pressed(KeyCode::Escape) {

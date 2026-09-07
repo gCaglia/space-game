@@ -1,10 +1,19 @@
 use std::time::SystemTime;
 
-use crate::entities::{asteroids::Asteroid, laser::Laser};
+use macroquad::{
+    audio::{PlaySoundParams, Sound, load_sound_from_bytes, play_sound},
+    rand::ChooseRandom,
+};
+
+use crate::{
+    entities::{asteroids::Asteroid, laser::Laser},
+    utils::constants::EXPLOSIONS,
+};
 
 pub struct Spawner {
     asteroids: Vec<Asteroid>,
     start_time: SystemTime,
+    sounds: Vec<Sound>,
 }
 
 impl Spawner {
@@ -14,7 +23,19 @@ impl Spawner {
         Spawner {
             asteroids,
             start_time,
+            sounds: Vec::new(),
         }
+    }
+
+    pub async fn load_sounds(mut self) -> Spawner {
+        let futures = EXPLOSIONS.iter().map(|data| load_sound_from_bytes(data));
+        let sounds: Vec<Sound> = futures::future::join_all(futures)
+            .await
+            .into_iter()
+            .map(|r| r.unwrap())
+            .collect();
+        self.sounds = sounds;
+        self
     }
 
     pub fn step(&mut self, shots: &mut Vec<Laser>) {
@@ -61,8 +82,22 @@ impl Spawner {
             let shots_orig = shots.len();
             shots.retain_mut(|s| !a.get_body().intersect(s.get_body()).is_some());
             let shots_after = shots.len();
-            shots_orig == shots_after
+            if shots_orig == shots_after {
+                true
+            } else {
+                Self::play_explosion_sound(&self.sounds);
+                false
+            }
         });
+    }
+
+    fn play_explosion_sound(sounds: &[Sound]) {
+        let sound = sounds.choose().unwrap();
+        let params = PlaySoundParams {
+            looped: false,
+            volume: 1.0,
+        };
+        play_sound(sound, params);
     }
 
     fn update_asteroids(&mut self) {
