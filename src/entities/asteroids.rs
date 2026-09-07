@@ -1,6 +1,6 @@
 use macroquad::{
     color::WHITE,
-    math::{Circle, Rect},
+    math::Rect,
     prelude::ImageFormat,
     rand::{ChooseRandom, RandomRange},
     texture::{DrawTextureParams, Texture2D, draw_texture_ex},
@@ -119,23 +119,14 @@ impl Asteroid {
         draw_texture_ex(texture, x, y, color, params);
     }
 
-    pub fn get_body(&self) -> Circle {
+    pub fn get_body(&self) -> Rect {
         let x = self.rel_pos[0] * screen_width();
         let y = self.rel_pos[1] * screen_height();
-        let r = self.texture.height().min(self.texture.width()) * 0.8;
-        Circle { x, y, r }
-    }
-
-    pub fn collission_with_rect(&self, other: Rect) -> bool {
-        // Find the closest point on the rect to the circle's center
-        let body = self.get_body();
-        let closest_x = body.x.clamp(other.x, other.x + other.w);
-        let closest_y = body.y.clamp(other.y, other.y + other.h);
-
-        let dx = body.x - closest_x;
-        let dy = body.y - closest_y;
-
-        // Returns true if there is indeed a collision
-        (dx * dx + dy * dy) <= body.radius().powi(2)
+        Rect {
+            x,
+            y,
+            w: self.texture.width(),
+            h: self.texture.height(),
+        }
     }
 }

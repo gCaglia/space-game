@@ -59,7 +59,7 @@ impl Spawner {
     fn check_laser_collission(&mut self, shots: &mut Vec<Laser>) {
         self.asteroids.retain_mut(|a| {
             let shots_orig = shots.len();
-            shots.retain_mut(|s| !a.collission_with_rect(s.get_body()));
+            shots.retain_mut(|s| !a.get_body().intersect(s.get_body()).is_some());
             let shots_after = shots.len();
             shots_orig == shots_after
         });
