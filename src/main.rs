@@ -9,6 +9,8 @@ use crate::entities::ship::{Drawable, Movable};
 use crate::entities::spawner;
 
 const LASER_SOUND: &[u8] = include_bytes!("../assets/sounds/laserSmall_004.ogg");
+const DEBUG: bool = false;
+const GODMODE: bool = false;
 
 mod entities;
 mod utils;
@@ -31,6 +33,7 @@ async fn main() {
     let laser_sound: Sound = load_sound_from_bytes(LASER_SOUND).await.unwrap();
     let mut ship = Ship::new(ship_texture, laser_sound);
     let mut spawner = spawner::Spawner::new().load_sounds().await;
+    let mut game_over = false;
 
     loop {
         if is_key_pressed(KeyCode::Escape) {
@@ -47,9 +50,24 @@ async fn main() {
                 ..Default::default()
             },
         );
-        ship.step();
+        if !game_over {
+            ship.step();
+        }
         ship.draw();
-        spawner.step(ship.get_shots_mut());
+
+        let ship_body = ship.get_body();
+        let mut_shots = ship.get_shots_mut();
+        game_over = spawner.step(mut_shots, ship_body, &game_over);
+
+        if game_over {
+            draw_text(
+                "GAME\nOVER!",
+                0.5 * screen_width() - 100.0,
+                0.5 * screen_height(),
+                50.0,
+                ORANGE,
+            );
+        }
         next_frame().await
     }
 }

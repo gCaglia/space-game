@@ -1,16 +1,19 @@
+use std::f32::consts::PI;
+
 use macroquad::{
     audio::{PlaySoundParams, Sound, play_sound},
-    color::WHITE,
+    color::{WHITE, YELLOW},
     input::{
         KeyCode::{self},
         is_key_down, is_key_pressed,
     },
     math::Rect,
+    shapes::draw_rectangle,
     texture::{DrawTextureParams, Texture2D, draw_texture_ex},
     window::{screen_height, screen_width},
 };
 
-use crate::entities::laser::Laser;
+use crate::{DEBUG, entities::laser::Laser};
 
 const ACC_SPEED: f32 = 1e-5;
 const GAME_BOUNDS: (f32, f32) = (0.0, 0.975);
@@ -115,10 +118,31 @@ impl Movable for Ship {
     fn get_body(&self) -> Rect {
         let x = self.rel_pos[0] * screen_width();
         let y = self.rel_pos[1] * screen_height();
-        let h = self.texture.height();
-        let w = self.texture.width();
+        let h = self.texture.height() * 0.95;
+        let w = self.texture.width() * 0.95;
 
-        Rect { x, y, w, h }
+        // Check if we need to swap x and y for more precise colission detection
+        // If the angle is between 0.25pi and 0.75pi or 1.25pi and 1.75pi,
+        // the, x and y should be swapped so that the rectangle is lying on its
+        // side instead of standing up.
+        let swap = 0.25 * PI <= self.angle.abs() && self.angle.abs() <= 0.75 * PI;
+        let body: Rect = if swap {
+            Rect {
+                x: x - self.texture.width() / 4.0,
+                y: y + self.texture.height() / 4.0,
+                w: h,
+                h: w,
+            }
+        } else {
+            Rect { x, y, w, h }
+        };
+
+        if DEBUG {
+            println!("Angle: {}; Swap: {}", self.angle, swap);
+            draw_rectangle(body.x, body.y, body.w, body.h, YELLOW);
+        }
+
+        body
     }
 
     fn update_fire(&mut self) {

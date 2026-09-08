@@ -2,10 +2,12 @@ use std::time::SystemTime;
 
 use macroquad::{
     audio::{PlaySoundParams, Sound, load_sound_from_bytes, play_sound},
+    math::Rect,
     rand::ChooseRandom,
 };
 
 use crate::{
+    GODMODE,
     entities::{asteroids::Asteroid, laser::Laser},
     utils::constants::EXPLOSIONS,
 };
@@ -38,10 +40,12 @@ impl Spawner {
         self
     }
 
-    pub fn step(&mut self, shots: &mut Vec<Laser>) {
+    pub fn step(&mut self, shots: &mut Vec<Laser>, ship_body: Rect, game_over: &bool) -> bool {
         // Update the position of all asteroids and
         // despawn all OOB
-        self.update_asteroids();
+        if !game_over {
+            self.update_asteroids();
+        }
 
         // Despawn by hit
         self.check_laser_collission(shots);
@@ -58,6 +62,15 @@ impl Spawner {
 
         // Draw all
         self.asteroids.iter().for_each(|a| a.draw());
+
+        // Check collision with ship
+        if GODMODE {
+            false
+        } else {
+            self.asteroids
+                .iter()
+                .any(|a| a.get_body().intersect(ship_body).is_some())
+        }
     }
 
     fn get_goal(&self) -> u16 {

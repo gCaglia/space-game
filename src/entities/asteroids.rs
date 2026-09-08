@@ -125,8 +125,8 @@ impl Asteroid {
         Rect {
             x,
             y,
-            w: self.texture.width(),
-            h: self.texture.height(),
+            w: self.texture.width() * 0.80,
+            h: self.texture.height() * 0.80,
         }
     }
 }
