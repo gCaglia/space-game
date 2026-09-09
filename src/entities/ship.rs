@@ -1,4 +1,7 @@
-use std::f32::consts::PI;
+use std::{
+    f32::consts::PI,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
 use macroquad::{
     audio::{PlaySoundParams, Sound, play_sound},
@@ -9,7 +12,7 @@ use macroquad::{
     },
     math::Rect,
     shapes::draw_rectangle,
-    texture::{DrawTextureParams, Texture2D, draw_texture_ex},
+    texture::{DrawTextureParams, Texture2D, draw_texture, draw_texture_ex},
     window::{screen_height, screen_width},
 };
 
@@ -18,6 +21,7 @@ use crate::{DEBUG, entities::laser::Laser};
 const ACC_SPEED: f32 = 1e-5;
 const GAME_BOUNDS: (f32, f32) = (0.0, 0.975);
 const ACC_CEIL: f32 = 0.1;
+const INVINCIBILITY_DURATION: Duration = Duration::new(5, 0);
 
 pub struct Ship {
     texture: Texture2D,
@@ -25,8 +29,11 @@ pub struct Ship {
     acc_vector: Vec<f32>,
     angle: f32,
 
+    lives: u8,
     shots: Vec<Laser>,
     laser_sound: Sound,
+    last_hit_option: Option<SystemTime>,
+    invincible: bool,
 }
 
 pub trait Drawable {
@@ -51,11 +58,48 @@ impl Ship {
             angle: 0.0,
             shots: Vec::new(),
             laser_sound,
+            lives: 3,
+            last_hit_option: None,
+            invincible: false,
         }
     }
 
     pub fn get_shots_mut(&mut self) -> &mut Vec<Laser> {
         &mut self.shots
+    }
+
+    pub fn take_damage(&mut self) -> bool {
+        if self.invincible {
+            false // Return with no dmg
+        } else if self.lives > 0 {
+            self.lives -= 1;
+            self.last_hit_option = Some(SystemTime::now());
+            self.invincible = true;
+            false // Not dead
+        } else {
+            // Dead
+            true
+        }
+    }
+
+    fn show_lives(&self) {
+        let texture = &self.texture;
+        let y = 0.9 * screen_height();
+        let color = WHITE;
+
+        for i in 0..self.lives {
+            let x = 0.9 * screen_width() + (i as f32) * texture.width() + 10.0;
+            draw_texture(texture, x, y, color);
+        }
+    }
+
+    fn check_invincible(&mut self) {
+        if self.invincible {
+            let now = SystemTime::now();
+            let last_hit = self.last_hit_option.unwrap_or(now);
+            let duration = now.duration_since(last_hit).unwrap_or(Duration::new(0, 0));
+            self.invincible = duration < INVINCIBILITY_DURATION;
+        }
     }
 }
 
@@ -63,16 +107,24 @@ impl Drawable for Ship {
     fn draw(&self) {
         let pos_x = self.rel_pos.first().unwrap() * screen_width();
         let pos_y = self.rel_pos.get(1).unwrap() * screen_height();
-        draw_texture_ex(
-            &self.texture,
-            pos_x,
-            pos_y,
-            WHITE,
-            DrawTextureParams {
-                rotation: self.angle,
-                ..Default::default()
-            },
-        );
+
+        let blink = self.invincible
+            && SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos().is_multiple_of(2);
+        if !blink {
+            draw_texture_ex(
+                &self.texture,
+                pos_x,
+                pos_y,
+                WHITE,
+                DrawTextureParams {
+                    rotation: self.angle,
+                    ..Default::default()
+                },
+            );
+        }
     }
 }
 
@@ -165,5 +217,7 @@ impl Movable for Ship {
         self.update_angle();
         self.update_pos();
         self.update_fire();
+        Self::show_lives(self);
+        self.check_invincible();
     }
 }

@@ -57,7 +57,11 @@ async fn main() {
 
         let ship_body = ship.get_body();
         let mut_shots = ship.get_shots_mut();
-        game_over = spawner.step(mut_shots, ship_body, &game_over);
+        let life_lost = spawner.step(mut_shots, ship_body, &game_over);
+
+        if life_lost {
+            game_over = ship.take_damage();
+        }
 
         if game_over {
             draw_text(
