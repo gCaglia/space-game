@@ -112,7 +112,8 @@ impl Drawable for Ship {
             && SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
-                .as_nanos().is_multiple_of(2);
+                .as_nanos()
+                .is_multiple_of(2);
         if !blink {
             draw_texture_ex(
                 &self.texture,
