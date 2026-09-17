@@ -1,12 +1,12 @@
 use std::time::UNIX_EPOCH;
 
-use macroquad::audio::{Sound, load_sound_from_bytes};
+use macroquad::audio::load_sound_from_bytes;
 use macroquad::prelude::*;
 use macroquad::rand::srand;
 
 use crate::entities::ship::Ship;
 use crate::entities::ship::{Drawable, Movable};
-use crate::entities::spawner;
+use crate::entities::spawner::Spawner;
 use crate::screens::credits::render_credits;
 use crate::screens::menu::render_menu;
 use crate::utils::overlay::draw_overlay;
@@ -38,15 +38,12 @@ async fn main() {
     );
 
     let background_bytes = include_bytes!("../assets/graphics/space.png");
-    let ship_bytes = include_bytes!("../assets/graphics/ship.png");
     let background: Texture2D =
         Texture2D::from_file_with_format(background_bytes, Some(ImageFormat::Png));
-    let ship_texture: Texture2D =
-        Texture2D::from_file_with_format(ship_bytes, Some(ImageFormat::Png));
-    let laser_sound: Sound = load_sound_from_bytes(LASER_SOUND).await.unwrap();
-    let mut ship = Ship::new(ship_texture, laser_sound);
-    let mut spawner = spawner::Spawner::new().load_sounds().await;
     let mut game_state = GameState::Menu;
+
+    // Basic Init (for to guarantee we have something)
+    let (mut ship, mut spawner) = new_game().await;
 
     loop {
         // Background Texture
@@ -66,6 +63,9 @@ async fn main() {
         if game_state == GameState::Menu {
             draw_overlay();
             game_state = render_menu();
+            if game_state == GameState::Playing {
+                (ship, spawner) = new_game().await;
+            }
         } else if game_state == GameState::Playing || game_state == GameState::GameOver {
             // Playing
             if game_state != GameState::GameOver {
@@ -108,4 +108,14 @@ async fn main() {
         // Next Frame
         next_frame().await
     }
+}
+
+async fn new_game() -> (Ship, Spawner) {
+    let ship_bytes = include_bytes!("../assets/graphics/ship.png");
+    let texture = Texture2D::from_file_with_format(ship_bytes, Some(ImageFormat::Png));
+    let laser_sound = load_sound_from_bytes(LASER_SOUND).await.unwrap();
+    (
+        Ship::new(texture, laser_sound),
+        Spawner::new().load_sounds().await,
+    )
 }
