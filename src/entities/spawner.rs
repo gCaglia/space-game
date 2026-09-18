@@ -16,7 +16,7 @@ use crate::{
 
 pub struct Spawner {
     asteroids: Vec<Asteroid>,
-    time_since_start: f64,
+    start_time: f64,
     sounds: Vec<Sound>,
     hits: u64,
 }
@@ -24,11 +24,11 @@ pub struct Spawner {
 impl Spawner {
     pub fn new() -> Self {
         let asteroids: Vec<Asteroid> = Vec::new();
-        let time_since_start: f64 = get_time();
+        let start_time: f64 = 0.0;
         let hits = 0;
         Spawner {
             asteroids,
-            time_since_start,
+            start_time,
             sounds: Vec::new(),
             hits,
         }
@@ -80,11 +80,13 @@ impl Spawner {
     }
 
     fn get_goal(&self) -> u16 {
-        if self.time_since_start < 60.0 {
+        let time_since_start = get_time() - self.start_time;
+
+        if time_since_start < 30.0 {
             5
-        } else if self.time_since_start <= 120.0 {
+        } else if time_since_start <= 45.0 {
             10
-        } else if self.time_since_start <= 180.0 {
+        } else if time_since_start <= 180.0 {
             20
         } else {
             50
