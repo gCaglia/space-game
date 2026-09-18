@@ -1,5 +1,3 @@
-use std::time::UNIX_EPOCH;
-
 use macroquad::audio::load_sound_from_bytes;
 use macroquad::prelude::*;
 use macroquad::rand::srand;
@@ -30,13 +28,6 @@ enum GameState {
 
 #[macroquad::main("SpaceGame")]
 async fn main() {
-    srand(
-        std::time::SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_secs(),
-    );
-
     let background_bytes = include_bytes!("../assets/graphics/space.png");
     let background: Texture2D =
         Texture2D::from_file_with_format(background_bytes, Some(ImageFormat::Png));
@@ -111,6 +102,7 @@ async fn main() {
 }
 
 async fn new_game() -> (Ship, Spawner) {
+    srand(get_time() as u64);
     let ship_bytes = include_bytes!("../assets/graphics/ship.png");
     let texture = Texture2D::from_file_with_format(ship_bytes, Some(ImageFormat::Png));
     let laser_sound = load_sound_from_bytes(LASER_SOUND).await.unwrap();

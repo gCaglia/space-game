@@ -1,7 +1,4 @@
-use std::{
-    f32::consts::PI,
-    time::{Duration, SystemTime, UNIX_EPOCH},
-};
+use std::f32::consts::PI;
 
 use macroquad::{
     audio::{PlaySoundParams, Sound, play_sound},
@@ -13,6 +10,7 @@ use macroquad::{
     math::Rect,
     shapes::draw_rectangle,
     texture::{DrawTextureParams, Texture2D, draw_texture, draw_texture_ex},
+    time::get_time,
     window::{screen_height, screen_width},
 };
 
@@ -21,7 +19,7 @@ use crate::{DEBUG, entities::laser::Laser};
 const ACC_SPEED: f32 = 1e-5;
 const GAME_BOUNDS: (f32, f32) = (0.0, 0.975);
 const ACC_CEIL: f32 = 0.1;
-const INVINCIBILITY_DURATION: Duration = Duration::new(5, 0);
+const INVINCIBILITY_DURATION: f64 = 5.0;
 
 pub struct Ship {
     texture: Texture2D,
@@ -32,7 +30,7 @@ pub struct Ship {
     lives: u8,
     shots: Vec<Laser>,
     laser_sound: Sound,
-    last_hit_option: Option<SystemTime>,
+    last_hit_option: Option<f64>,
     invincible: bool,
 }
 
@@ -73,7 +71,7 @@ impl Ship {
             false // Return with no dmg
         } else if self.lives > 0 {
             self.lives -= 1;
-            self.last_hit_option = Some(SystemTime::now());
+            self.last_hit_option = Some(get_time());
             self.invincible = true;
             false // Not dead
         } else {
@@ -95,9 +93,9 @@ impl Ship {
 
     fn check_invincible(&mut self) {
         if self.invincible {
-            let now = SystemTime::now();
+            let now = get_time();
             let last_hit = self.last_hit_option.unwrap_or(now);
-            let duration = now.duration_since(last_hit).unwrap_or(Duration::new(0, 0));
+            let duration = now - last_hit;
             self.invincible = duration < INVINCIBILITY_DURATION;
         }
     }
@@ -108,12 +106,7 @@ impl Drawable for Ship {
         let pos_x = self.rel_pos.first().unwrap() * screen_width();
         let pos_y = self.rel_pos.get(1).unwrap() * screen_height();
 
-        let blink = self.invincible
-            && SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_nanos()
-                .is_multiple_of(2);
+        let blink = self.invincible && ((get_time() * 100.0) as u64).is_multiple_of(2);
         if !blink {
             draw_texture_ex(
                 &self.texture,

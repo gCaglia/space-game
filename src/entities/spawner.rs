@@ -1,11 +1,10 @@
-use std::time::SystemTime;
-
 use macroquad::{
     audio::{PlaySoundParams, Sound, load_sound_from_bytes, play_sound},
     color::YELLOW,
     math::Rect,
     rand::ChooseRandom,
     text::draw_text,
+    time::get_time,
     window::{screen_height, screen_width},
 };
 
@@ -17,7 +16,7 @@ use crate::{
 
 pub struct Spawner {
     asteroids: Vec<Asteroid>,
-    start_time: SystemTime,
+    time_since_start: f64,
     sounds: Vec<Sound>,
     hits: u64,
 }
@@ -25,11 +24,11 @@ pub struct Spawner {
 impl Spawner {
     pub fn new() -> Self {
         let asteroids: Vec<Asteroid> = Vec::new();
-        let start_time: SystemTime = SystemTime::now();
+        let time_since_start: f64 = get_time();
         let hits = 0;
         Spawner {
             asteroids,
-            start_time,
+            time_since_start,
             sounds: Vec::new(),
             hits,
         }
@@ -81,16 +80,11 @@ impl Spawner {
     }
 
     fn get_goal(&self) -> u16 {
-        let time_since_start = SystemTime::now()
-            .duration_since(self.start_time)
-            .unwrap()
-            .as_secs();
-
-        if time_since_start < 60 {
+        if self.time_since_start < 60.0 {
             5
-        } else if time_since_start <= 120 {
+        } else if self.time_since_start <= 120.0 {
             10
-        } else if time_since_start <= 180 {
+        } else if self.time_since_start <= 180.0 {
             20
         } else {
             50
