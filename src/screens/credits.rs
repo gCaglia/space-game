@@ -33,7 +33,7 @@ pub fn render_credits() -> GameState {
     render_line("Monogames on Pixabay".to_string(), 0.50);
 
     render_line("Other assets and game by:".to_string(), 0.6);
-    render_line("Giulia Caglia:".to_string(), 0.65);
+    render_line("Giulia Caglia".to_string(), 0.65);
     if is_key_pressed(KeyCode::Escape) {
         GameState::Menu
     } else {

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-mkdir dist/
+mkdir -p dist/
 
 cargo clean
 cargo build --release
